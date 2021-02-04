@@ -145,6 +145,7 @@ public abstract class AnnotationConfigUtils {
 	 * @return a Set of BeanDefinitionHolders, containing all bean definitions
 	 * that have actually been registered by this call
 	 */
+	/*组件注册*/
 	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
 
@@ -213,6 +214,7 @@ public abstract class AnnotationConfigUtils {
 			BeanDefinitionRegistry registry, RootBeanDefinition definition, String beanName) {
 
 		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		/**注册BeanDefinition**/
 		registry.registerBeanDefinition(beanName, definition);
 		return new BeanDefinitionHolder(definition, beanName);
 	}
