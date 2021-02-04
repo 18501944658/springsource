@@ -270,6 +270,12 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @return set of beans registered if any for tooling registration purposes (never {@code null})
 	 */
 	/*重点方法,
+	doScan方法的,将basePackage所在路径转化为classpath .class文件路径,遍历获取所有目录下.class文件
+	并获取所有class的资源路径,完成默认过滤注解注册默认为@Compnents,遍历所有resource资源,并转换为metadateReader
+	元数据对象,并遍历该对象,判断annotationType类型为@Compnents的metadateReader,将符合要求的metadateReader封装为
+	BeanDefinition对象ScannedGennericBeanDefinition对象,遍历所有ScannedGennericBeanDefinition对象,补全属性数据,
+	并将ScannedGennericBeanDefinition,beanName,aliases封装到BeanDefinitionHolder对象中,并将BeanDefinitionHolder
+    对象在BeanDefinitionRegister中完成Bean注册,并返回所有BeanDefinition对象集合
 	解析注册BeanDefinition对象*/
 	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
