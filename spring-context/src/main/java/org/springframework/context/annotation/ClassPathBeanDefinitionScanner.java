@@ -275,7 +275,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 		for (String basePackage : basePackages) {
+			/**获取basePackage下含有默认@Components注解类,解析完成ScannedGenericBeanDefinition对象集合**/
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+			/**遍历符合含有默认注解@Compnents注解的类解析ScannedGennricBeanDefinition对象
+			 *,补全ScannedGennericBeanDefinition对象数据**/
 			for (BeanDefinition candidate : candidates) {
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
@@ -287,10 +290,13 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
 				if (checkCandidate(beanName, candidate)) {
+					/**将beanName,ScannedGennricBeanDefinition,aliases,封装入BeanDefinitionHolder对象中,**/
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+					/**放入BeanDefinitionHolder集合**/
 					beanDefinitions.add(definitionHolder);
+					/**注册BeanDefinition对象到BeanDefinitionRegister中**/
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}

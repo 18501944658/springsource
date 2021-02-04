@@ -313,6 +313,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
 		}
 		else {
+			/**扫描可能依赖注入的class**/
 			return scanCandidateComponents(basePackage);
 		}
 	}
@@ -412,8 +413,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		}
 		return candidates;
 	}
-
+    /***扫描含有默认注解@Components类,并封装解析为ScannedGenericBeanDefinition对象加入set集合candidates,并返回结果**/
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
+		/**将包含默认注解的BeanDefinition对象类加入set集合**/
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
 			//获取basePackage=com.itszt.gold所在文件路径-classpath*:com/itszt/gold/**/*.class,下的所有的class文件路径
@@ -430,7 +432,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				}
 				if (resource.isReadable()) {
 					try {
+						/***获取缓存class文件对应Resource资源的元数据**/
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
+						/**判断class资源是否含有元数据,含有则解析封装为ScannedGenericBeanDefinition对象**/
 						if (isCandidateComponent(metadataReader)) {
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 							sbd.setSource(resource);
@@ -496,6 +500,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			}
 		}
 		for (TypeFilter tf : this.includeFilters) {
+			/**判断读取Resource文件的元数据metadataReader是否包含默认includeFilters中过滤下来的注解**/
 			if (tf.match(metadataReader, getMetadataReaderFactory())) {
 				return isConditionMatch(metadataReader);
 			}
