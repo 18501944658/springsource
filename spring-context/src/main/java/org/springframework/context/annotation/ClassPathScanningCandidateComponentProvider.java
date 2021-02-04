@@ -203,6 +203,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
+		/**将use-default-filter设置为true,使用默认注解过滤,默认为@Componet,@Componet默认为@Service,@Controller,@Resiostry,@Configration等注解的父类注解,他们也会被过滤**/
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
 		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
 		try {
@@ -415,11 +416,14 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
+			//获取basePackage=com.itszt.gold所在文件路径-classpath*:com/itszt/gold/**/*.class,下的所有的class文件路径
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
+			/**遍历所有class文件,获取Resoures资源路径file [E:\workspace\github\springorigin\target\classes\com\itszt\gold\Student.class]**/
 			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
+			/**遍历所有的获取的class文件Resources资源文件**/
 			for (Resource resource : resources) {
 				if (traceEnabled) {
 					logger.trace("Scanning " + resource);

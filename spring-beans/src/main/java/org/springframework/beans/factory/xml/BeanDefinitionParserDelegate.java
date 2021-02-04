@@ -412,11 +412,13 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, @Nullable BeanDefinition containingBean) {
+		/***获取Element中id属性,和name属性**/
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
 		List<String> aliases = new ArrayList<>();
 		if (StringUtils.hasLength(nameAttr)) {
+			/**name有多个别名会用,逗号分割***/
 			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			aliases.addAll(Arrays.asList(nameArr));
 		}
@@ -431,9 +433,10 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		if (containingBean == null) {
+			/**检查别名是否重复***/
 			checkNameUniqueness(beanName, aliases, ele);
 		}
-
+        /**解析Element为的beanDefinition**/
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 		if (beanDefinition != null) {
 			if (!StringUtils.hasText(beanName)) {
@@ -512,17 +515,22 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		try {
+			/***创建GenericBeanDefinition对象**/
 			AbstractBeanDefinition bd = createBeanDefinition(className, parent);
-
+			/**解析bean标签的属性,并把解析出来的属性设置到BeanDefinition对象中***/
 			parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
 			bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
-
+            /**解析bean中的meta标签**/
 			parseMetaElements(ele, bd);
+			/**解析bean标签的属性,并把解析出来的属性设置到BeanDefinition对象中**/
 			parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
+			/**解析bean中的replaced-method标签**/
 			parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
-
+            /**解析bean中construct-arg标签**/
 			parseConstructorArgElements(ele, bd);
+			/**解析bean中的property标签**/
 			parsePropertyElements(ele, bd);
+			/**可以不看,用不到**/
 			parseQualifierElements(ele, bd);
 
 			bd.setResource(this.readerContext.getResource());
@@ -1379,10 +1387,12 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele, @Nullable BeanDefinition containingBd) {
+		/**根据当前标签头信息context获取对应nameSpaceUri**/
 		String namespaceUri = getNamespaceURI(ele);
 		if (namespaceUri == null) {
 			return null;
 		}
+		/**根据nameSpaceUri获取对应继承NameSpaceHandler类的实例对象并初始化**/
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);

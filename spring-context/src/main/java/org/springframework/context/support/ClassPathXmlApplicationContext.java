@@ -141,6 +141,9 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 		super(parent);
 		setConfigLocations(configLocations);
 		if (refresh) {
+			/**
+			 * 重点5  进行配置文件的读取和封装
+			 */
 			refresh();
 		}
 	}

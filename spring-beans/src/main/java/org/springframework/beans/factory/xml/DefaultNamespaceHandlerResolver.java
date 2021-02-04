@@ -78,6 +78,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * @see #DEFAULT_HANDLER_MAPPINGS_LOCATION
 	 */
 	public DefaultNamespaceHandlerResolver() {
+		/**构造函数默认，Map<String, Object> handlerMappings 设置为DEFAULT_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.handlers";**/
 		this(null, DEFAULT_HANDLER_MAPPINGS_LOCATION);
 	}
 
@@ -115,6 +116,10 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	@Override
 	@Nullable
 	public NamespaceHandler resolve(String namespaceUri) {
+		/**handlerMappings初始话是读取所有jar包下META-INF/spring.handler文件下
+		 * nameSpaceUri-nameSpaceHandler类名全称形式Key-Value存入map中
+		 * 当对应nameSpaceHandler实例化后则存取nameSpaceHandler实例化的对象
+		 * **/
 		Map<String, Object> handlerMappings = getHandlerMappings();
 		Object handlerOrClassName = handlerMappings.get(namespaceUri);
 		if (handlerOrClassName == null) {
@@ -126,13 +131,17 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 		else {
 			String className = (String) handlerOrClassName;
 			try {
+				/**通过反射获取一个继承了NameSpaceHandler类对象**/
 				Class<?> handlerClass = ClassUtils.forName(className, this.classLoader);
 				if (!NamespaceHandler.class.isAssignableFrom(handlerClass)) {
 					throw new FatalBeanException("Class [" + className + "] for namespace [" + namespaceUri +
 							"] does not implement the [" + NamespaceHandler.class.getName() + "] interface");
 				}
+				/***根据类对象,通过反射实例化一个继承NameSpaceHandler的类对象**/
 				NamespaceHandler namespaceHandler = (NamespaceHandler) BeanUtils.instantiateClass(handlerClass);
+				/***初始化类型,加载当前nameSpaceUri对应的所有标签的解析器,以Key标签名-Value对应标签解析类存入map中**/
 				namespaceHandler.init();
+				/**将当前nameSpaceUri和实例初始化后的继承nameSpaceHandler的类,以Key-Value的形式存入handlerMapping**/
 				handlerMappings.put(namespaceUri, namespaceHandler);
 				return namespaceHandler;
 			}
@@ -151,6 +160,9 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * Load the specified NamespaceHandler mappings lazily.
 	 */
 	private Map<String, Object> getHandlerMappings() {
+		/**handlerMappings 默认会加载handlerMappingsLocation=“META-INF/spring.handler”配置文件中的key-value
+		 *  文件中对应的是nameSpaceUri-nameSpaceHandler实现类
+		 *  **/
 		Map<String, Object> handlerMappings = this.handlerMappings;
 		if (handlerMappings == null) {
 			synchronized (this) {
