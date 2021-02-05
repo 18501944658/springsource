@@ -581,6 +581,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+				/*
+				 * 这个方法是spring中最重要的方法,没有之一
+				 *
+				 * 1.bean实例化过程
+				 *
+				 * 2.ioc
+				 *
+				 * 3.注解支持
+				 *
+				 * 4.BeanPostProcessor的执行
+				 *
+				 * 5.Aop的入口
+				 */
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
@@ -910,6 +923,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
+		/*
+		 * 重点看这个方法
+		 */
 		beanFactory.preInstantiateSingletons();
 	}
 
