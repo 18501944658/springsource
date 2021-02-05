@@ -170,6 +170,7 @@ public abstract class AbstractApplicationEventMulticaster
 	 * @return a Collection of ApplicationListeners
 	 * @see org.springframework.context.ApplicationListener
 	 */
+	/*获取当前所有监听事件*/
 	protected Collection<ApplicationListener<?>> getApplicationListeners(
 			ApplicationEvent event, ResolvableType eventType) {
 

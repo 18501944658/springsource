@@ -401,6 +401,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			this.earlyApplicationEvents.add(applicationEvent);
 		}
 		else {
+			/***核心代码,拿到事件管理类-即维护的多个观察者**/
 			getApplicationEventMulticaster().multicastEvent(applicationEvent, eventType);
 		}
 
@@ -546,24 +547,37 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				postProcessBeanFactory(beanFactory);
 
 				// Invoke factory processors registered as beans in the context.
-				/**
+				/*
 				 * 用来找出所有beanFactory后置处理器，并且调用这些处理器来改变bean的定义
 				 */
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
+				/*
+				 * 实例化实现了BeanDefinitionPostProcessor接口的类,并加入BeanFactory容器中
+				 * 该类是在自定义标签解析中的组件注册中封装为BeanDefinition对象
+				 */
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+				/*
+				 * 初始化事件管理器
+				 */
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
+				/*
+				 * 这个方法着重理解模板设计模式,因为springboot中,这个方法是用来做内嵌tomcat启动的
+				 */
 				onRefresh();
 
 				// Check for listener beans and register them.
+				/*
+				 * 往事件管理类中注册事件类
+				 */
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
