@@ -556,6 +556,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		if (instanceWrapper == null) {
 			/**创建实例,重点看,重要程度5**/
+			/***只是在堆内存中划了一块空间,空间内的属性是为空的**/
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		/***获取我们创建的实例**/
@@ -569,6 +570,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		synchronized (mbd.postProcessingLock) {
 			if (!mbd.postProcessed) {
 				try {
+					/*
+					 * CommonAnnotationBeanPostProcessor 支持了@PostConstruct @PreDestroy,@Resource注解
+					 * AutowiredAnnotationBeanPostProcessor 支持！AutoWirde,@Value注解
+					 * BeanPostProcessor接口的典型运用,这里要理解这个接口
+					 * 对类中注解的装配过程
+					 * 重要程度5,必须看
+					 */
 					applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
 				}
 				catch (Throwable ex) {
