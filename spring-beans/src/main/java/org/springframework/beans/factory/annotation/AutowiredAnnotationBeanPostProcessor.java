@@ -243,6 +243,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		/**收集注解@AutoWired,包装成InjectionMetadata对象***/
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
 		metadata.checkConfigMembers(beanDefinition);
 	}
@@ -453,7 +454,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					if (metadata != null) {
 						metadata.clear(pvs);
 					}
+					/**主要看这个方法,收集包含@Autowired注解的属性和方法,并封装到injectionMetadata对象中**/
 					metadata = buildAutowiringMetadata(clazz);
+					/**还做了一个缓存的操作,将包含@Autowired注解的属性和方法放到缓存中**/
 					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
@@ -471,7 +474,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		do {
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
-
+             /**寻找field上面的@Autowired注解并封装成对象***/
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
 				MergedAnnotation<?> ann = findAutowiredAnnotation(field);
 				if (ann != null) {
@@ -482,10 +485,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						return;
 					}
 					boolean required = determineRequiredStatus(ann);
+					/**将field属性和属性值包装成一个AtowiredFieldElement对象**/
 					currElements.add(new AutowiredFieldElement(field, required));
 				}
 			});
-
+            /**寻找Method上面的@Autowired注解并封装成对象**/
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
 				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
@@ -507,6 +511,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					}
 					boolean required = determineRequiredStatus(ann);
 					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+					/**将method和方法参数包装成为AutowiredMethodElement对象**/
 					currElements.add(new AutowiredMethodElement(method, required, pd));
 				}
 			});
@@ -515,7 +520,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			targetClass = targetClass.getSuperclass();
 		}
 		while (targetClass != null && targetClass != Object.class);
-
+		       /***将收集到带有注解的字段和方法封装成InjectionMetadata对象**/
 		return InjectionMetadata.forElements(elements, clazz);
 	}
 

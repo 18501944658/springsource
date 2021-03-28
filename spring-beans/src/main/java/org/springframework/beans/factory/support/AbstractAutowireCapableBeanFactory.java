@@ -556,7 +556,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		if (instanceWrapper == null) {
 			/**创建实例,重点看,重要程度5**/
-			/***只是在堆内存中划了一块空间,空间内的属性是为空的**/
+			/***只是在堆内存中划了一块空间,空间内的属性是为空的,所以接下来还需要遍历类属性和类方法上的注解**/
+
+			/***
+			 * 创建bean实例,并将实例包裹在BeanWrapper实现类对象中返回.
+			 * createBeanInstance中包含三种创建bean实例的方式
+			 * 1、通过工厂方法创建bean实例,factory-method 和factory-bean指定其他类中的非静态方法;
+			 *    或者指定beanClass,beanClass中指定静态方法factory-method。
+			 * 2、通过构造方法自动注入(@AutoWired)方法,
+			 *    @AutoWired注解下单个构造方法,单个方法@AutoWired(required=true)
+			 *    @AutoWired注解下多个构造方法,多个方法@AutoWired(required=false)
+			 *    无@AutoWired注解下多个构造方法
+			 */
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		/***获取我们创建的实例**/
@@ -572,7 +583,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				try {
 					/*
 					 * CommonAnnotationBeanPostProcessor 支持了@PostConstruct @PreDestroy,@Resource注解
-					 * AutowiredAnnotationBeanPostProcessor 支持！AutoWirde,@Value注解
+					 * AutowiredAnnotationBeanPostProcessor 支持！@AutoWirde,@Value注解
 					 * BeanPostProcessor接口的典型运用,这里要理解这个接口
 					 * 对类中注解的装配过程
 					 * 重要程度5,必须看
@@ -602,6 +613,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Initialize the bean instance.
 		Object exposedObject = bean;
 		try {
+			/***
+			 * 对bean对象进行赋值
+			 */
 			populateBean(beanName, mbd, instanceWrapper);
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
@@ -1171,6 +1185,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #instantiateBean
 	 */
 	/*
+	 *  createBeanInstance
 	 * 1.实例化factoryMethod方法对应的实例
 	 * 2.实例化带有@Autowired注解的有参构造函数
 	 * 3.实例化没有@Autowired的有参构造函数
@@ -1407,6 +1422,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof InstantiationAwareBeanPostProcessor) {
 					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+					/**只要覆写这个方法,并返回fasle,就会进入if,导致所有的bean没办法完成依赖注入**/
 					if (!ibp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
 						return;
 					}
@@ -1434,6 +1450,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		boolean needsDepCheck = (mbd.getDependencyCheck() != AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
 
 		PropertyDescriptor[] filteredPds = null;
+		/**核心代码**/
 		if (hasInstAwareBpps) {
 			if (pvs == null) {
 				pvs = mbd.getPropertyValues();
@@ -1441,6 +1458,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof InstantiationAwareBeanPostProcessor) {
 					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+					/**iOC的核心方法,@Autowired依赖注入过程**/
 					PropertyValues pvsToUse = ibp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
 					if (pvsToUse == null) {
 						if (filteredPds == null) {
