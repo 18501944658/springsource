@@ -411,7 +411,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		Object result = existingBean;
+		/*拿到所有的beanPostProcessor***/
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
+			/**遍历BeanPostProcessor,对指定Aware和AwareProcessor进行赋值操作*/
 			Object current = processor.postProcessBeforeInitialization(result, beanName);
 			if (current == null) {
 				return result;
@@ -620,10 +622,24 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Initialize the bean instance.
 		Object exposedObject = bean;
 		try {
-			/***
-			 * 对bean对象进行赋值
+			/*
+			 * ioc,di的核心方法,主要完成了@Autowired,xml配置的方式的依赖注入,<property><constructor-arg>标签依赖注入
+			 * @Autowired注解依赖注入也是借助了BeanPostProcessor接口来实现,
+			 * 对应的方法是:
+			 * postProcessProperties
 			 */
 			populateBean(beanName, mbd, instanceWrapper);
+			/*
+			 * 1.调用Aware接口
+			 *
+			 * 2.调用@PostConstruct注解的方法,这里是通过BeanPostProcessor接口来实现该功能
+			 *
+			 * 3.调用实现了InitializingBean接口的类中的afterPropertiesSet方法,调用init-method中配置的方法
+			 *
+			 * 4.代理实例创建,用BeanPostProcessor接口来完成代理实例的生成
+			 *
+			 */
+			/**init-method属性和InitializingBean接口方法afterPropertiesSet调用.@PostConstruct注解方法调用.代理对象的生成入口**/
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -1823,20 +1839,35 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+				/**调用Aware方法一部分,还有一部分是通过BeanPostProcess来调用的**/
 				invokeAwareMethods(beanName, bean);
 				return null;
 			}, getAccessControlContext());
 		}
 		else {
+			/**调用Aware方法**/
 			invokeAwareMethods(beanName, bean);
 		}
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
+			/*
+			 * 对类中某些特殊方法的调用,比如@PostConstruct,Aware接口,非常重要 重要程度5
+			 *
+			 * ApplicationContextAwareProcessor对Aware接口的调用
+			 *   EnvironmentAware EmbeddedValueResolverAware ResourceLoaderAware ApplicationContextAware
+			 *
+			 *   ImportAwareBeanPostProcessor 对ImportAware的支持
+			 *
+			 * 在该方法处循环所有的BeanPostProcessor进行Bean的属性赋值增强功能
+			 */
+			/**这里也对含有@PostConsruct注解的方法进行调用**/
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
 		try {
+			/**调用实现了InitializingBean接口并覆写了afterPropertiesSet方法,并执行该方法
+			   再执行init-method方法**/
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
 		catch (Throwable ex) {
@@ -1845,12 +1876,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
+			/**这个地方可能生出代理实例,是aop的入口**/
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
 
 		return wrappedBean;
 	}
 
+	/*
+	 * 判断实现的Aware接口的类型进行指定覆写的方法
+	 * @param beanName
+	 * @param bean
+	 */
 	private void invokeAwareMethods(String beanName, Object bean) {
 		if (bean instanceof Aware) {
 			if (bean instanceof BeanNameAware) {
@@ -1891,6 +1928,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (System.getSecurityManager() != null) {
 				try {
 					AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () -> {
+						/**实现InitializingBean接口,覆写afterPropertiesSet方法,并调用该方法***/
 						((InitializingBean) bean).afterPropertiesSet();
 						return null;
 					}, getAccessControlContext());
@@ -1900,6 +1938,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 			else {
+				/**实现InitializingBean接口,覆写afterPropertiesSet方法,并调用该方法***/
 				((InitializingBean) bean).afterPropertiesSet();
 			}
 		}
@@ -1909,6 +1948,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (StringUtils.hasLength(initMethodName) &&
 					!(isInitializingBean && "afterPropertiesSet".equals(initMethodName)) &&
 					!mbd.isExternallyManagedInitMethod(initMethodName)) {
+				/**调用init-method配置的方法***/
 				invokeCustomInitMethod(beanName, bean, mbd);
 			}
 		}

@@ -450,12 +450,25 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return pvs;
 		}
 
+		/*
+		 * Import注解作用,有时候我们需要拿到使用了@Import注解的类的类上所有的注解信息
+		 * 则需要使用@Import注解
+		 * @param bean
+		 * @param beanName
+		 * @return
+		 */
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) {
 			if (bean instanceof ImportAware) {
 				ImportRegistry ir = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
+				/**拿到实现了ImportAware接口的实例对象,并设置回setImportMetadata***/
 				AnnotationMetadata importingClass = ir.getImportingClassFor(ClassUtils.getUserClass(bean).getName());
 				if (importingClass != null) {
+					/**必须是实现ImportAware接口的类,通过@Import(ImportAware接口的类)注解在指定其他类上,
+					 * 才能进入该条件中并且调用setImportMetadata方法设置带有@Import(ImportAware接口的类)注解
+					 * 类信息importingClass
+					 *
+					 * **/
 					((ImportAware) bean).setImportMetadata(importingClass);
 				}
 			}
