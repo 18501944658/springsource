@@ -875,8 +875,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (String beanName : beanNames) {
 			/**把父类的BeanDefinition里面的属性拿到子类BeanDefinition中,是对存在parent属性的标签Bean***/
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
-			/**如果不是抽象的,单例的,非懒加载的就实例化***/
+			/**如果不是抽象的,单例的,非懒加载的就实例化* **/
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+				/**判断bean是否实现了BeanFactory接口**/
 				if (isFactoryBean(beanName)) {
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
 					if (bean instanceof FactoryBean) {
@@ -897,7 +898,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 				}
 				else {
-					/**主要看这个方法,看实例化过程**/
+					/**主要看这个方法,看实例化过程,for循环实例化每一个bean**/
 					getBean(beanName);
 				}
 			}
@@ -1228,6 +1229,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(
 					descriptor, requestingBeanName);
 			if (result == null) {
+				/**最终调到引用类型的getBean操作**/
 				result = doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter);
 			}
 			return result;
@@ -1265,7 +1267,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
 				}
 			}
-
+            /**触发getBean操作**/
 			Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
 			if (multipleBeans != null) {
 				return multipleBeans;
@@ -1335,6 +1337,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		Class<?> type = descriptor.getDependencyType();
 
 		if (descriptor instanceof StreamDependencyDescriptor) {
+			              /**触发getBean操作**/
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (autowiredBeanNames != null) {
 				autowiredBeanNames.addAll(matchingBeans.keySet());
@@ -1491,6 +1494,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		for (String candidate : candidateNames) {
 			if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, descriptor)) {
+				/**触发getBean操作**/
 				addCandidateEntry(result, candidate, descriptor, requiredType);
 			}
 		}
@@ -1501,6 +1505,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			for (String candidate : candidateNames) {
 				if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, fallbackDescriptor) &&
 						(!multiple || getAutowireCandidateResolver().hasQualifier(descriptor))) {
+					/**触发getBean操作**/
 					addCandidateEntry(result, candidate, descriptor, requiredType);
 				}
 			}
@@ -1523,10 +1528,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Add an entry to the candidate map: a bean instance if available or just the resolved
 	 * type, preventing early bean initialization ahead of primary candidate selection.
 	 */
+	/*触发getBean操作的方法***/
 	private void addCandidateEntry(Map<String, Object> candidates, String candidateName,
 			DependencyDescriptor descriptor, Class<?> requiredType) {
 
 		if (descriptor instanceof MultiElementDescriptor) {
+			/**重点核心 5 @@@触发getBean操作,最终实现beanFactory.getBean(beanName)方法,获取Bean实例**/
 			Object beanInstance = descriptor.resolveCandidate(candidateName, requiredType, this);
 			if (!(beanInstance instanceof NullBean)) {
 				candidates.put(candidateName, beanInstance);

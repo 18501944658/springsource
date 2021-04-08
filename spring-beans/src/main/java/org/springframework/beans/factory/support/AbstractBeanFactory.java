@@ -281,12 +281,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected <T> T doGetBean(
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
-
+        /**获取系统默认规则beanName*/
 		String beanName = transformedBeanName(name);
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
-		/**从缓存中拿实例**/
+		/**从缓存中拿实例,主要用来解决循环依赖问题**/
 		Object sharedInstance = getSingleton(beanName);
 		/**如果缓存中能拿到实例***/
 		if (sharedInstance != null && args == null) {
@@ -358,6 +358,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                   /*着重看大部分都是单例的情况***/
 				// Create bean instance.
 				if (mbd.isSingleton()) {
+					/**创建Bean真正的逻辑***/
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
 							/**重点方法  程度5**/

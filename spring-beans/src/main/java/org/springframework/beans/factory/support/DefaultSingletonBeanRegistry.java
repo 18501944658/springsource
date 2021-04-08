@@ -155,9 +155,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(singletonFactory, "Singleton factory must not be null");
 		synchronized (this.singletonObjects) {
+			/*如果一级缓存不存在,不存在则说明bean还没有创建成功***/
 			if (!this.singletonObjects.containsKey(beanName)) {
+				/*设置三级缓存,设置一个对象bean工厂缓存****/
 				this.singletonFactories.put(beanName, singletonFactory);
+				/*删除二级缓存***/
 				this.earlySingletonObjects.remove(beanName);
+				/*用于统计***/
 				this.registeredSingletons.add(beanName);
 			}
 		}
@@ -181,7 +185,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		/**singletonObjects 一级缓存**/
 		Object singletonObject = this.singletonObjects.get(beanName);
+		/**判断缓存中为空或者是正在实例化的bean**/
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+			/**防止多线程**/
 			synchronized (this.singletonObjects) {
 				/**earlySingletonObjects 二级缓存**/
 				singletonObject = this.earlySingletonObjects.get(beanName);
@@ -190,6 +196,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 					if (singletonFactory != null) {
 						singletonObject = singletonFactory.getObject();
+						/**从三级缓存拿,放到二级缓存中,然后删除三级缓冲中bean**/
 						this.earlySingletonObjects.put(beanName, singletonObject);
 						this.singletonFactories.remove(beanName);
 					}
