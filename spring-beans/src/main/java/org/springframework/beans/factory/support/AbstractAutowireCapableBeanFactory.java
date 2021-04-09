@@ -615,6 +615,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 			/***
 			 * 对理解循环依赖帮助非常大,重要程度5, 添加三级缓存
+			 *
+			 * 只要是单例,可循环依赖,正在创建存在于SingletonCurrentlyInCreation的set集合中,将
+			 * 匿名对象工厂添加到singletonFactories三级缓存中
 			 */
 			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
 		}
@@ -1008,12 +1011,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Object exposedObject = bean;
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
+				/**将所有符合条件的BeanPostProcessor对exposedObject对象进行修改并重新赋值给exposedObject,这是典型的装饰
+				 * 如果没有符合的BeanPostProcessor则直接返回原对象**/
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
 					exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
 				}
 			}
 		}
+		/**其实就是返回对象本身***/
 		return exposedObject;
 	}
 
