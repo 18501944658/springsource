@@ -684,6 +684,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Register bean as disposable.
 		try {
+			/**在每一个Bean实例化完成后都会创建一个Bean对应的销毁对象,放入
+			 * Map<String, Object> disposableBeans = new LinkedHashMap<>();
+			 * key-beanName
+			 * value-Bean对应销毁时的类DisposableBeanAdapter
+			 * ***/
+			/**注册的bean销毁时的类DisposableBeanAdapter**/
 			registerDisposableBeanIfNecessary(beanName, bean, mbd);
 		}
 		catch (BeanDefinitionValidationException ex) {

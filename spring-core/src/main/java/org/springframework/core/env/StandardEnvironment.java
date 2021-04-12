@@ -75,7 +75,9 @@ public class StandardEnvironment extends AbstractEnvironment {
 	 */
 	@Override
 	protected void customizePropertySources(MutablePropertySources propertySources) {
+		/**Environment实现类的构造函数调用该方法,初始化基础的系统环境变量**/
 		propertySources.addLast(
+				/**PropertiesPropertySource对应的属性源,包含2个属性,一个是属性源名称,另一个是具体的泛型T属性实例**/
 				new PropertiesPropertySource(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, getSystemProperties()));
 		propertySources.addLast(
 				new SystemEnvironmentPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, getSystemEnvironment()));

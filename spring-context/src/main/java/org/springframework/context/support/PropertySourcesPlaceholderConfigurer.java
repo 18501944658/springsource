@@ -124,15 +124,23 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	 * ignored</strong>. This method is designed to give the user fine-grained control over property
 	 * sources, and once set, the configurer makes no assumptions about adding additional sources.
 	 */
+	/***
+	 * 调用的是这个,新版本参数解析执行的是这里
+	 * @param beanFactory
+	 * @throws BeansException
+	 */
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertySources == null) {
 			this.propertySources = new MutablePropertySources();
 			if (this.environment != null) {
+				/**把environment对象封装成PropertySource对象MutablePropertySource中list**/
 				this.propertySources.addLast(
+						/**environmentProperties属性源的名称,泛型T,覆写getProperty方法,从泛型T中拿到想要的配置值**/
 					new PropertySource<Environment>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
 						@Override
 						@Nullable
+						/**source就是environment对象**/
 						public String getProperty(String key) {
 							return this.source.getProperty(key);
 						}
@@ -140,8 +148,10 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 				);
 			}
 			try {
+				/**加载本地配置文件中的属性值包装成properties对象后,最终包装成PropertySource对象**/
 				PropertySource<?> localPropertySource =
 						new PropertiesPropertySource(LOCAL_PROPERTIES_PROPERTY_SOURCE_NAME, mergeProperties());
+				/**加入MutablePropertySoures中的list中**/
 				if (this.localOverride) {
 					this.propertySources.addFirst(localPropertySource);
 				}
@@ -153,7 +163,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 				throw new BeanInitializationException("Could not load properties", ex);
 			}
 		}
-
+		/**重点 5**/
 		processProperties(beanFactory, new PropertySourcesPropertyResolver(this.propertySources));
 		this.appliedPropertySources = this.propertySources;
 	}
@@ -164,11 +174,12 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	 */
 	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess,
 			final ConfigurablePropertyResolver propertyResolver) throws BeansException {
-
+        /***设置占位符的前缀后缀**/
 		propertyResolver.setPlaceholderPrefix(this.placeholderPrefix);
 		propertyResolver.setPlaceholderSuffix(this.placeholderSuffix);
+		/**设置分割符 :冒号分割符**/
 		propertyResolver.setValueSeparator(this.valueSeparator);
-
+        /**重点是这个匿名对象@Value的依赖注入会调过来***/
 		StringValueResolver valueResolver = strVal -> {
 			String resolved = (this.ignoreUnresolvablePlaceholders ?
 					propertyResolver.resolvePlaceholders(strVal) :
@@ -178,7 +189,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 			}
 			return (resolved.equals(this.nullValue) ? null : resolved);
 		};
-
+        /**核心流程,把占位符${xxx}替换成真正的值***/
 		doProcessProperties(beanFactoryToProcess, valueResolver);
 	}
 
