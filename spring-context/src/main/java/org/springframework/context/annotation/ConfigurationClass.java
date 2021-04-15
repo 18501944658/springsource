@@ -47,18 +47,18 @@ import org.springframework.util.ClassUtils;
  * @see ConfigurationClassParser
  */
 final class ConfigurationClass {
-
+    /**类里面的基本元信息***/
 	private final AnnotationMetadata metadata;
 
 	private final Resource resource;
 
 	@Nullable
 	private String beanName;
-
+    /**存放包含内部类的主类即父类,内部类是主类importedBy进来的****/
 	private final Set<ConfigurationClass> importedBy = new LinkedHashSet<>(1);
-
+    /**类内有@Bean的方法放入这个set集合中**/
 	private final Set<BeanMethod> beanMethods = new LinkedHashSet<>();
-
+    /**类实现某个接口,则放入这个map中**/
 	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
 			new LinkedHashMap<>();
 

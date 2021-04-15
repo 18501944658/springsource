@@ -298,6 +298,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.trace("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
+			/**该方法是FactoryBean接口的调用入口**/
+			/**将name带&符号的和beanName不带&符号的都传参进去**/
 			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		} else {
 			/*如果缓存中SingletonObjects缓存里面没有,则走下去***/
@@ -382,8 +384,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					} finally {
 						afterPrototypeCreation(beanName);
 					}
+					/**该方法是FactoryBean接口的调用入口**/
 					bean = getObjectForBeanInstance(prototypeInstance, name, beanName, mbd);
 				} else {
+					/**自定义scope**/
 					String scopeName = mbd.getScope();
 					if (!StringUtils.hasLength(scopeName)) {
 						throw new IllegalStateException("No scope name defined for bean ´" + beanName + "'");
@@ -393,6 +397,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						throw new IllegalStateException("No Scope registered for scope name '" + scopeName + "'");
 					}
 					try {
+						/**这里调用到实现了Scope接口的类get方法**/
 						Object scopedInstance = scope.get(beanName, () -> {
 							beforePrototypeCreation(beanName);
 							try {
@@ -1834,14 +1839,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
 		// If it's a FactoryBean, we use it to create a bean instance, unless the
 		// caller actually wants a reference to the factory.
+		/**如果实例不是FactoryBean类型的**/
 		if (!(beanInstance instanceof FactoryBean)) {
 			return beanInstance;
 		}
-
+        /**如果代码能走下来,则说明beanName不是以&开头,并且beanInstance是FactoryBean类型的**/
 		Object object = null;
 		if (mbd != null) {
 			mbd.isFactoryBean = true;
 		} else {
+			/**从缓存里面拿FactoryBean类型实例**/
 			object = getCachedObjectForFactoryBean(beanName);
 		}
 		if (object == null) {
@@ -1852,6 +1859,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
+			/**重点**/
 			object = getObjectFromFactoryBean(factory, beanName, !synthetic);
 		}
 		return object;

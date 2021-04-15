@@ -81,6 +81,7 @@ abstract class ConfigurationClassUtils {
 	 * @param metadataReaderFactory the current factory in use by the caller
 	 * @return whether the candidate qualifies as (any kind of) configuration class
 	 */
+	/*判断for循环中遍历到的BeanDefinition是否应该被我们ConfigurationClassPostProcessor处理****/
 	public static boolean checkConfigurationClassCandidate(
 			BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
 
@@ -90,11 +91,13 @@ abstract class ConfigurationClassUtils {
 		}
 
 		AnnotationMetadata metadata;
+		/**如果是扫描注解产生的BeanDefinition**/
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
 			// Can reuse the pre-parsed metadata from the given BeanDefinition...
 			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
 		}
+		/**非扫描注解产生的BeanDefinition**/
 		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
 			// Check already loaded Class if present...
 			// since we possibly can't even load the class file for this Class.
@@ -120,11 +123,13 @@ abstract class ConfigurationClassUtils {
 				return false;
 			}
 		}
-
+		/**从metadata中获取Configuration注解***/
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
+		/**如果有Configuation注解,就是完全匹配标识,full全匹配***/
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
+		/**如果是有Component ComponentScan的 Import ImportResource或者方法上面有@Bean,就是lite匹配,有一点点匹配***/
 		else if (config != null || isConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
@@ -133,6 +138,7 @@ abstract class ConfigurationClassUtils {
 		}
 
 		// It's a full or lite configuration candidate... Let's determine the order value, if any.
+		/**获取@Order注解***/
 		Integer order = getOrder(metadata);
 		if (order != null) {
 			beanDef.setAttribute(ORDER_ATTRIBUTE, order);
@@ -148,6 +154,15 @@ abstract class ConfigurationClassUtils {
 	 * @return {@code true} if the given class is to be registered for
 	 * configuration class processing; {@code false} otherwise
 	 */
+	/*判断是否有候选资格,是否包含
+	* 	candidateIndicators.add(Component.class.getName());
+		candidateIndicators.add(ComponentScan.class.getName());
+		candidateIndicators.add(Import.class.getName());
+		candidateIndicators.add(ImportResource.class.getName());
+		这其中注解  是否方法上有@Bean注解
+
+	*
+	* ***/
 	public static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
 		// Do not consider an interface or an annotation...
 		if (metadata.isInterface()) {
