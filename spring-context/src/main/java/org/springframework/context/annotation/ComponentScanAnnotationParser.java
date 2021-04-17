@@ -95,20 +95,22 @@ class ComponentScanAnnotationParser {
 
 		for (AnnotationAttributes filter : componentScan.getAnnotationArray("includeFilters")) {
 			for (TypeFilter typeFilter : typeFiltersFor(filter)) {
+				/**扫描器设置过滤的注解**/
 				scanner.addIncludeFilter(typeFilter);
 			}
 		}
 		for (AnnotationAttributes filter : componentScan.getAnnotationArray("excludeFilters")) {
 			for (TypeFilter typeFilter : typeFiltersFor(filter)) {
+				/**扫描器排除不扫描的注解**/
 				scanner.addExcludeFilter(typeFilter);
 			}
 		}
-
+        /**是否懒加载**/
 		boolean lazyInit = componentScan.getBoolean("lazyInit");
 		if (lazyInit) {
 			scanner.getBeanDefinitionDefaults().setLazyInit(true);
 		}
-
+        /**默认扫描注解的包**/
 		Set<String> basePackages = new LinkedHashSet<>();
 		String[] basePackagesArray = componentScan.getStringArray("basePackages");
 		for (String pkg : basePackagesArray) {
@@ -129,6 +131,7 @@ class ComponentScanAnnotationParser {
 				return declaringClass.equals(className);
 			}
 		});
+		/**核心扫描流程***/
 		return scanner.doScan(StringUtils.toStringArray(basePackages));
 	}
 

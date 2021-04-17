@@ -73,9 +73,13 @@ public interface DeferredImportSelector extends ImportSelector {
 		 * {@link Configuration} class and the class name to import.
 		 */
 		class Entry {
-
+			/**
+			 * metadata对象
+			 */
 			private final AnnotationMetadata metadata;
-
+			/**
+			 * 类名
+			 */
 			private final String importClassName;
 
 			public Entry(AnnotationMetadata metadata, String importClassName) {
