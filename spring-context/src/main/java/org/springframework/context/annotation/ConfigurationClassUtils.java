@@ -82,6 +82,7 @@ abstract class ConfigurationClassUtils {
 	 * @return whether the candidate qualifies as (any kind of) configuration class
 	 */
 	/*判断for循环中遍历到的BeanDefinition是否应该被我们ConfigurationClassPostProcessor处理****/
+	/**判断bd的是否带有@Configuration等注解**/
 	public static boolean checkConfigurationClassCandidate(
 			BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
 
@@ -91,13 +92,22 @@ abstract class ConfigurationClassUtils {
 		}
 
 		AnnotationMetadata metadata;
-		/**如果是扫描注解产生的BeanDefinition**/
+		/**如果是扫描注解产生的BeanDefinition
+		 *
+		 * 1.通过注解注入的bd都是AnnotatedGenericBeanDefinition,实现了AnnotatedBeanDefinition
+		 *    ScanedGenericBeanDefinition
+		 *
+		 * 2.spring内部的bd是rootBeanDefinition,实现了AbstractBeanDefinition
+		 *
+		 *
+		 * **/
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
 			// Can reuse the pre-parsed metadata from the given BeanDefinition...
+			/**获取元数据信息注解信息,类信息**/
 			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
 		}
-		/**非扫描注解产生的BeanDefinition**/
+		/**非扫描注解产生的BeanDefinition,只有我们自己手动创建一个GenericBeanDefinition,并将他注册进Registry中时才走这**/
 		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
 			// Check already loaded Class if present...
 			// since we possibly can't even load the class file for this Class.
@@ -111,6 +121,7 @@ abstract class ConfigurationClassUtils {
 			metadata = AnnotationMetadata.introspect(beanClass);
 		}
 		else {
+			/**基本走不到**/
 			try {
 				MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
 				metadata = metadataReader.getAnnotationMetadata();

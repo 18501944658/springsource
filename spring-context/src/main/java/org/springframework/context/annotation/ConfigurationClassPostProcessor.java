@@ -232,7 +232,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					"postProcessBeanFactory already called on this post-processor against " + registry);
 		}
 		this.registriesPostProcessed.add(registryId);
-
+		/**
+		 * 核心逻辑获取注解注册的BeanDefinition
+		 */
 		processConfigBeanDefinitions(registry);
 	}
 
