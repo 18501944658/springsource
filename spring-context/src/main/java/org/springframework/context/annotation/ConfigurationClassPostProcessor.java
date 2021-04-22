@@ -255,7 +255,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			// Simply call processConfigurationClasses lazily at this point then.
 			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
 		}
-
+		/**
+		 * cglib代理
+		 */
 		enhanceConfigurationClasses(beanFactory);
 		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
 	}
@@ -284,7 +286,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		// Return immediately if no @Configuration classes were found
-		/**如果容器为空,则直接返回**/
+		/**如果容器为空,即没有@Configuration以及
+		 *  candidateIndicators.add(Component.class.getName());
+		 * 	candidateIndicators.add(ComponentScan.class.getName());
+		 * 	candidateIndicators.add(Import.class.getName());
+		 * 	candidateIndicators.add(ImportResource.class.getName());
+		 * 	以上这些注解,则直接返回
+		 * 则直接返回**/
 		if (configCandidates.isEmpty()) {
 			return;
 		}
