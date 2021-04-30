@@ -474,7 +474,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		if (advisorsPreFiltered()) {
 			proxyFactory.setPreFiltered(true);
 		}
-       /**创建并返回合适的AOP对象**/
+       /**创建并返回合适的AOP代理对象**/
 		return proxyFactory.getProxy(getProxyClassLoader());
 	}
 
