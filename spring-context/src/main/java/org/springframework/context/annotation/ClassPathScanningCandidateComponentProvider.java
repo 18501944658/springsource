@@ -433,6 +433,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				if (resource.isReadable()) {
 					try {
 						/***获取缓存class文件对应Resource资源的元数据**/
+						/**通过CachingMetadataReaderFactory获取MetadataReader对象**/
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
 						/**判断class资源是否含有元数据,含有则解析封装为ScannedGenericBeanDefinition对象**/
 						if (isCandidateComponent(metadataReader)) {
