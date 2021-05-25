@@ -291,10 +291,17 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * identified as one to proxy by the subclass.
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
+	/***
+	 * 当前正在实例化的bean,如果有代理的话就生成当前bean的代理
+	 * @param bean
+	 * @param beanName
+	 * @return
+	 */
 	@Override
 	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
+			/**三级缓存中可能会提前生成代理,所以这里可能就不会走了,不再生成代理***/
 			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
 				/**重点方法5**/
 				return wrapIfNecessary(bean, beanName, cacheKey);
@@ -452,8 +459,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		}
        /**获取合适的ProxyFactory**/
 		ProxyFactory proxyFactory = new ProxyFactory();
+		/**把AnnotationAwareAspectJAutoProxyCreator中的某些属性copy到proxyFactory***/
 		proxyFactory.copyFrom(this);
-
+		/***
+		 * 决定是jdk代理还是cglib代理
+		 */
 		if (!proxyFactory.isProxyTargetClass()) {
 			if (shouldProxyTargetClass(beanClass, beanName)) {
 				proxyFactory.setProxyTargetClass(true);
@@ -462,7 +472,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 				evaluateProxyInterfaces(beanClass, proxyFactory);
 			}
 		}
-
+        /**组装Advisor**/
 		Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
 		/**设置当前beanName涉及的所有的切面**/
 		proxyFactory.addAdvisors(advisors);
@@ -516,6 +526,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	protected Advisor[] buildAdvisors(@Nullable String beanName, @Nullable Object[] specificInterceptors) {
 		// Handle prototypes correctly...
+		/**设置自定义的MethodInterceptor 和 Advice**/
 		Advisor[] commonInterceptors = resolveInterceptorNames();
 
 		List<Object> allInterceptors = new ArrayList<>();

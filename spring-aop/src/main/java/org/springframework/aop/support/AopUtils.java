@@ -244,8 +244,9 @@ public abstract class AopUtils {
 			classes.add(ClassUtils.getUserClass(targetClass));
 		}
 		classes.addAll(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
-
+       /**判断类中方法是否匹配,有些可能是方法上面有注释的拦截,所以需要判断方法是否匹配**/
 		for (Class<?> clazz : classes) {
+			/***获取类中所有方法**/
 			Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
 			for (Method method : methods) {
 				if (introductionAwareMethodMatcher != null ?

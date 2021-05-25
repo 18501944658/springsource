@@ -49,12 +49,16 @@ public abstract class AspectJProxyUtils {
 			for (Advisor advisor : advisors) {
 				// Be careful not to get the Advice without a guard, as this might eagerly
 				// instantiate a non-singleton AspectJ aspect...
+				/**如果是@Aspect注解类型切面,InstantiationModelAwarePointcutAdvisor类型***/
 				if (isAspectJAdvice(advisor)) {
 					foundAspectJAdvice = true;
 					break;
 				}
 			}
 			if (foundAspectJAdvice && !advisors.contains(ExposeInvocationInterceptor.ADVISOR)) {
+				/***在容器第一个位置,添加一个默认切面,将methodInvocation放到ThreadLocal,为了解决参数的传递问题
+				 * 因为advisor是切面调用是一个链式调用,我们可以通过执行到哪个切面增强,在threadlocal中拿到我们需要的参数**/
+				/**ExposeInvocationInterceptor.currentInvocation(); 获取当前增强的invocation对象**/
 				advisors.add(0, ExposeInvocationInterceptor.ADVISOR);
 				return true;
 			}

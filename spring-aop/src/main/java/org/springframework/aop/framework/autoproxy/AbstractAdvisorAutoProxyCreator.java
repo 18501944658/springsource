@@ -95,8 +95,11 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
 		/**找到候选的切面,其实就是一个寻找有@Aspect注解的过程,把工程中所有有这个注解的类封装成Advisor返回***/
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
+		/***findCandidateAdvisors()是找到所有的切面,但是这些切面里不一定都是匹配当前正在封装的bean对象,
+		 * 所以我们需要判断匹配**/
 		/**判断候选的切面是否作用在当前beanClass上面,就是一个匹配过程.现在就是一个匹配**/
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
+		/**针对@Aspect注解切面添加了一个默认的切面 DefaultPointcutAdvisor 为了解决@Aspect注解参数传递问题的**/
 		extendAdvisors(eligibleAdvisors);
 		if (!eligibleAdvisors.isEmpty()) {
 			/**对有@Order@Priority进行排序***/
@@ -128,6 +131,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 
 		ProxyCreationContext.setCurrentProxiedBeanName(beanName);
 		try {
+			/**看看当前是否在这些切面的pointCut中  调类的方法的match过程***/
 			return AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
 		}
 		finally {
@@ -155,6 +159,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
 	 */
 	protected List<Advisor> sortAdvisors(List<Advisor> advisors) {
+		/**针对的是@Order注解和Orderd接口排序***/
 		AnnotationAwareOrderComparator.sort(advisors);
 		return advisors;
 	}
