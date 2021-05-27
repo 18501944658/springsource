@@ -295,9 +295,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				if (candidate instanceof AnnotatedBeanDefinition) {
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+				/**填充***/
 				if (checkCandidate(beanName, candidate)) {
 					/**将beanName,ScannedGennricBeanDefinition,aliases,封装入BeanDefinitionHolder对象中,**/
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+					/***applyScopedProxyMode***/
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					/**放入BeanDefinitionHolder集合**/

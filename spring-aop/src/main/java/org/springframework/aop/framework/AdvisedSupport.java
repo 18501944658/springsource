@@ -479,8 +479,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		MethodCacheKey cacheKey = new MethodCacheKey(method);
 		List<Object> cached = this.methodCache.get(cacheKey);
 		if (cached == null) {
+			/***获取当前bean的增强链advice***/
 			cached = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
 					this, method, targetClass);
+			/**放入缓存,方便下次在调用同一个bean下的方法时,直接从缓存中获取***/
 			this.methodCache.put(cacheKey, cached);
 		}
 		return cached;

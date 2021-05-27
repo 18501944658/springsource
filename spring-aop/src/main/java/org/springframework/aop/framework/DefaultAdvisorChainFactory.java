@@ -56,6 +56,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 		AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();
 		/**从代理工厂中获得该被代理类的所有切面advisor,config就是代理工厂对象***/
 		Advisor[] advisors = config.getAdvisors();
+		/**通过methodMathcer中match方法获得不一定是advice,是个Object类型***/
 		List<Object> interceptorList = new ArrayList<>(advisors.length);
 		Class<?> actualClass = (targetClass != null ? targetClass : method.getDeclaringClass());
 		Boolean hasIntroductions = null;
@@ -84,6 +85,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 
 						/***获取到切面advisor中的advice,并且包装成MethodInterceptor类型的对象**/
 						MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
+						/**isRuntime默认为fasle,只有自定义增强切面才为true***/
 						if (mm.isRuntime()) {
 							// Creating a new object instance in the getInterceptors() method
 							// isn't a problem as we normally cache created chains.
@@ -109,7 +111,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 				interceptorList.addAll(Arrays.asList(interceptors));
 			}
 		}
-
+        /**返回功能增强的advice集合,顺序符合默认切面增强-自定义切面增强-注解Aspect切面增强-自然顺序***/
 		return interceptorList;
 	}
 
