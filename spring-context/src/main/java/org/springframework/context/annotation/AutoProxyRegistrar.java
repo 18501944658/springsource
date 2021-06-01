@@ -60,6 +60,7 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 		boolean candidateFound = false;
 		Set<String> annTypes = importingClassMetadata.getAnnotationTypes();
 		for (String annType : annTypes) {
+			/***先拿到注解**/
 			AnnotationAttributes candidate = AnnotationConfigUtils.attributesFor(importingClassMetadata, annType);
 			if (candidate == null) {
 				continue;
@@ -70,8 +71,11 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 					Boolean.class == proxyTargetClass.getClass()) {
 				candidateFound = true;
 				if (mode == AdviceMode.PROXY) {
+					/**注册AOP的入口类InfrastructureAdvisorAutoProxyCreator***/
+					/**事务bean的入口类,判断所有bean实例化最后的有一个入口,如果有切面则生成代理***/
 					AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
 					if ((Boolean) proxyTargetClass) {
+						/**把属性设置到入口类中,最终会copy到ProxyFactory中***/
 						AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 						return;
 					}

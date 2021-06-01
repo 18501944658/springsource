@@ -183,6 +183,9 @@ public abstract class TransactionSynchronizationManager {
 			map = new HashMap<>();
 			resources.set(map);
 		}
+		/***数据源对象和当前调用的连接对象的映射***/
+		/**一般整个工程中数据源对象只有一个***/
+		/**resources是ThreadLocal中 当前请求的ThreadId和map的映射,map中是dataSource和Connection的映射***/
 		Object oldValue = map.put(actualKey, value);
 		// Transparently suppress a ResourceHolder that was marked as void...
 		if (oldValue instanceof ResourceHolder && ((ResourceHolder) oldValue).isVoid()) {

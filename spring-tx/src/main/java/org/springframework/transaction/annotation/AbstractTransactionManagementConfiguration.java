@@ -64,6 +64,10 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 		}
 	}
 
+	/***
+	 * 事务管理器提前注入,TransactionManagementConfigurer类型实例,我们需要实现该接口
+	 * @param configurers
+	 */
 	@Autowired(required = false)
 	void setConfigurers(Collection<TransactionManagementConfigurer> configurers) {
 		if (CollectionUtils.isEmpty(configurers)) {
@@ -73,6 +77,7 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 			throw new IllegalStateException("Only one TransactionManagementConfigurer may exist");
 		}
 		TransactionManagementConfigurer configurer = configurers.iterator().next();
+		/**调用覆写的annotationDrivenTransactionManager方法,获取创建的事务管理器,并赋值**/
 		this.txManager = configurer.annotationDrivenTransactionManager();
 	}
 
