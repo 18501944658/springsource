@@ -245,6 +245,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		/***这个代码是从ThreadLocal中获取到连接对象**/
 		ConnectionHolder conHolder =
 				(ConnectionHolder) TransactionSynchronizationManager.getResource(obtainDataSource());
+		/***从数据源对象中拿连接对象,然后把连接对象赋值给事务对象***/
 		txObject.setConnectionHolder(conHolder, false);
 		return txObject;
 	}
@@ -370,6 +371,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			logger.debug("Setting JDBC transaction [" + txObject.getConnectionHolder().getConnection() +
 					"] rollback-only");
 		}
+		/**设置回滚标识为true***/
 		txObject.setRollbackOnly();
 	}
 
