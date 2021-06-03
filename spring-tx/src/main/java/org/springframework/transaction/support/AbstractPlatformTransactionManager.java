@@ -448,7 +448,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				throw beginEx;
 			}
 		}
-
+         /**嵌套事务***/
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
 			if (!isNestedTransactionAllowed()) {
 				throw new NestedTransactionNotSupportedException(
@@ -458,12 +458,17 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			if (debugEnabled) {
 				logger.debug("Creating nested transaction with name [" + definition.getName() + "]");
 			}
+			/**默认是可以嵌套事务的***/
 			if (useSavepointForNestedTransaction()) {
 				// Create savepoint within existing Spring-managed transaction,
 				// through the SavepointManager API implemented by TransactionStatus.
 				// Usually uses JDBC 3.0 savepoints. Never activates Spring synchronization.
+				/**这里newTransaction为false***/
+				/**创建一个事务状态,不是新事务**/
 				DefaultTransactionStatus status =
 						prepareTransactionStatus(definition, transaction, false, false, debugEnabled, null);
+				/**创建回滚点**/
+				/***同样和jdbc一样是获取当前数据源连接 然后在连接上设置savepoint回滚点***/
 				status.createAndHoldSavepoint();
 				return status;
 			}
@@ -739,7 +744,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				triggerBeforeCommit(status);
 				triggerBeforeCompletion(status);
 				beforeCompletionInvoked = true;
-                /***如果有回滚点***/
+                /***如果有回滚点,则进行抹去,并设置为null***/
 				if (status.hasSavepoint()) {
 					if (status.isDebug()) {
 						logger.debug("Releasing transaction savepoint");
