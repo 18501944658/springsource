@@ -42,7 +42,9 @@ public class ProxyCachingConfiguration extends AbstractCachingConfiguration {
 	@Bean(name = CacheManagementConfigUtils.CACHE_ADVISOR_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public BeanFactoryCacheOperationSourceAdvisor cacheAdvisor() {
+		/**缓存切面创建的地方***/
 		BeanFactoryCacheOperationSourceAdvisor advisor = new BeanFactoryCacheOperationSourceAdvisor();
+		/***注解信息解析封装***/
 		advisor.setCacheOperationSource(cacheOperationSource());
 		advisor.setAdvice(cacheInterceptor());
 		if (this.enableCaching != null) {
